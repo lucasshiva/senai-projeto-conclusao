@@ -1,0 +1,11 @@
+services:
+  mysql-dev:
+    image: mysql:8
+    container_name: projeto-integrador-db-dev
+    environment:
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    ports:
+      - "${MYSQL_DEV_PORT:-3306}:3306"
