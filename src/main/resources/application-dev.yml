@@ -15,3 +15,8 @@ spring:
   flyway:
     enabled: true
     connect-retries: 3
+
+api:
+  security:
+    token:
+      secret: 123456
