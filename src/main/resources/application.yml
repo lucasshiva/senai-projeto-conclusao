@@ -8,3 +8,15 @@ spring:
   mvc:
     problemdetails:
       enabled: true
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+
+  flyway:
+    enabled: true
+    connect-retries: 3

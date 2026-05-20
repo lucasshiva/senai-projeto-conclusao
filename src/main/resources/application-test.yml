@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:${MYSQL_DEV_PORT}/${MYSQL_DATABASE}
+    url: jdbc:mysql://localhost:${MYSQL_TEST_PORT}/${MYSQL_DATABASE}
     username: ${MYSQL_USER}
     password: ${MYSQL_PASSWORD}
 
