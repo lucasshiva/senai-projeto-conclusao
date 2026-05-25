@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -54,7 +55,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             UserDetails user = userDetailsService.loadUserByUsername(username);
             var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authentication);
-        } catch (JWTVerificationException ex) {
+            IO.println("Authentication set!");
+        } catch (AuthenticationException | JWTVerificationException ex) {
             authenticationEntryPoint.commence(request, response, new BadCredentialsException(ex.getMessage(), ex));
             return;
         }

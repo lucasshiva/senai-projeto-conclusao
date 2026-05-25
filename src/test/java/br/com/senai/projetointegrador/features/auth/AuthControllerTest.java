@@ -6,7 +6,6 @@ import br.com.senai.projetointegrador.features.auth.login.LoginResponse;
 import br.com.senai.projetointegrador.features.auth.register.RegisterRequest;
 import br.com.senai.projetointegrador.features.auth.register.RegisterResponse;
 import br.com.senai.projetointegrador.features.users.Role;
-import br.com.senai.projetointegrador.features.users.User;
 import br.com.senai.projetointegrador.features.users.UserRepository;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -127,17 +126,11 @@ class AuthControllerTest extends IntegrationTestBase {
     class Login {
         private final LoginRequest validRequest = new LoginRequest(validLogin, validPassword);
 
-        private User addTestUserToDb(String login, String rawPassword) {
-            var password = passwordEncoder.encode(rawPassword);
-            var user = new User("test", login, password, Role.TEACHER);
-            return userRepository.save(user);
-        }
-
         @Nested
         class Validation {
             @Test
             void should_login_with_valid_payload() {
-                addTestUserToDb(validRequest.username(), validRequest.password());
+                addUserToDb(validRequest.username(), validRequest.password());
                 client.post()
                         .uri("/auth/login")
                         .body(validRequest)
@@ -175,7 +168,7 @@ class AuthControllerTest extends IntegrationTestBase {
         class BusinessLogic {
             @Test
             void should_return_token_on_login() {
-                addTestUserToDb(validRequest.username(), validRequest.password());
+                addUserToDb(validRequest.username(), validRequest.password());
                 client.post()
                         .uri("/auth/login")
                         .body(validRequest)

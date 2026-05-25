@@ -8,3 +8,7 @@ api:
   security:
     token:
       secret: 123456
+
+logging:
+  level:
+    org.springframework.security: DEBUG
