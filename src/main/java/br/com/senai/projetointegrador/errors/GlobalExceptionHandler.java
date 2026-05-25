@@ -1,5 +1,6 @@
 package br.com.senai.projetointegrador.errors;
 
+import br.com.senai.projetointegrador.features.auth.register.InvalidLoginException;
 import br.com.senai.projetointegrador.features.users.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -30,5 +31,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(UserNotFoundException.class)
     public ProblemDetail handleUserNotFoundException(UserNotFoundException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidLoginException.class)
+    public ProblemDetail handleInvalidLoginException(InvalidLoginException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
     }
 }

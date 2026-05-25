@@ -12,6 +12,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
@@ -118,6 +120,19 @@ class AuthControllerTest extends IntegrationTestBase {
                             assertThat(body.token()).isNotNull();
                             assertThat(body.token()).isNotBlank();
                         });
+            }
+
+            @Test
+            void should_reject_duplicate_login() {
+                var user = addUserToDb("user", "password");
+                var request = new RegisterRequest("name", user.getLogin(), user.getPassword(), Role.TEACHER);
+                client.post()
+                        .uri("/auth/register")
+                        .body(request)
+                        .exchange()
+                        .expectStatus()
+                        .isEqualTo(HttpStatus.CONFLICT)
+                        .expectBody(ProblemDetail.class);
             }
         }
     }
