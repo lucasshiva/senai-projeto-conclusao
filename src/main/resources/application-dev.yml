@@ -4,6 +4,10 @@ spring:
     username: ${MYSQL_USER}
     password: ${MYSQL_PASSWORD}
 
+app:
+  storage:
+    student-pictures: "uploads/students"
+
 api:
   security:
     token:
