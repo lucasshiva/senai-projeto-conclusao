@@ -23,7 +23,7 @@ class UserControllerTest extends IntegrationTestBase {
                 var request = new GetUserByIdRequest(null);
                 client.get()
                         .uri("/users/{id}", request.id())
-                        .headers(headers -> headers.setBearerAuth(adminToken()))
+                        .headers(headers -> headers.setBearerAuth(adminToken))
                         .exchange()
                         .expectStatus()
                         .isNotFound()
@@ -36,7 +36,7 @@ class UserControllerTest extends IntegrationTestBase {
                 var request = new GetUserByIdRequest(user.getId());
                 client.get()
                         .uri("/users/{id}", request.id())
-                        .headers(headers -> headers.setBearerAuth(adminToken()))
+                        .headers(headers -> headers.setBearerAuth(adminToken))
                         .exchange()
                         .expectStatus()
                         .isOk()
@@ -69,7 +69,7 @@ class UserControllerTest extends IntegrationTestBase {
                 var request = new GetUserByIdRequest(user.getId());
                 client.get()
                         .uri("/users/{id}", request.id())
-                        .headers(headers -> headers.setBearerAuth(adminToken()))
+                        .headers(headers -> headers.setBearerAuth(adminToken))
                         .exchange()
                         .expectStatus()
                         .isOk()
@@ -87,7 +87,7 @@ class UserControllerTest extends IntegrationTestBase {
                 var rawPassword = "rawPassword";
                 var user = addUserToDb("login", rawPassword, role);
                 var request = new GetUserByIdRequest(user.getId());
-                var token = login(user.getLogin(), rawPassword);
+                var token = getTokenFor(user);
                 client.get()
                         .uri("/users/{id}", request.id())
                         .headers(headers -> headers.setBearerAuth(token))

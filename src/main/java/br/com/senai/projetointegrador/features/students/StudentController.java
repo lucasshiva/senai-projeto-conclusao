@@ -7,6 +7,7 @@ import br.com.senai.projetointegrador.features.students.register.RegisterStudent
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,10 +19,14 @@ import org.springframework.web.multipart.MultipartFile;
 public class StudentController {
     private final RegisterStudentHandler registerStudentHandler;
 
+    @PostMapping
     public ResponseEntity<RegisterStudentResponse> register(
-            @RequestPart @Valid RegisterStudentRequest request, @RequestPart MultipartFile picture) {
+            @RequestPart @Valid RegisterStudentRequest request,
+            @RequestPart MultipartFile picture
+    ) {
         var command = new RegisterStudentCommand(request, picture);
         var response = registerStudentHandler.handle(command);
+
         return ResponseEntity.ok(response);
     }
 }

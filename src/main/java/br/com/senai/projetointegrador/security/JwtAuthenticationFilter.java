@@ -55,7 +55,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             UserDetails user = userDetailsService.loadUserByUsername(username);
             var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            IO.println("Authentication set!");
         } catch (AuthenticationException | JWTVerificationException ex) {
             authenticationEntryPoint.commence(request, response, new BadCredentialsException(ex.getMessage(), ex));
             return;
