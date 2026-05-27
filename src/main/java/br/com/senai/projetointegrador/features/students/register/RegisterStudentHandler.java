@@ -1,16 +1,17 @@
 package br.com.senai.projetointegrador.features.students.register;
 
 import br.com.senai.projetointegrador.config.storage.StorageProperties;
-import br.com.senai.projetointegrador.errors.FileStorageException;
 import br.com.senai.projetointegrador.features.students.Student;
 import br.com.senai.projetointegrador.features.students.StudentRepository;
+import br.com.senai.projetointegrador.features.students.register.exceptions.InvalidPictureException;
+import br.com.senai.projetointegrador.features.students.register.exceptions.PictureStorageException;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.BadRequestException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -28,29 +29,44 @@ public class RegisterStudentHandler {
     @Transactional
     public RegisterStudentResponse handle(RegisterStudentCommand cmd) {
         var request = cmd.request();
+        MultipartFile picture = cmd.picture();
 
-        try {
-            MultipartFile picture = cmd.picture();
-            if (!validContentTypes.contains(picture.getContentType())) {
-                throw new BadRequestException("Picture is not a valid content type: " + picture.getContentType());
-            }
-
-            Path root = storageProperties.studentPictures();
-            Files.createDirectories(root);
-
-            String extension = getExtension(picture.getOriginalFilename());
-            String filename = UUID.randomUUID() + extension;
-
-            Path target = root.resolve(filename);
-            Files.copy(picture.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
-            var student = new Student(request.name(), target.toString(), request.birthDate());
-            var saved = studentRepository.save(student);
-            return new RegisterStudentResponse(
-                    saved.getId(), saved.getName(), saved.getPicture(), saved.getBirthDate());
-
-        } catch (IOException ex) {
-            throw new FileStorageException("Couldn't register student: " + ex.getMessage());
+        if (!validContentTypes.contains(picture.getContentType())) {
+            throw new InvalidPictureException("Picture is not a valid content type: " + picture.getContentType());
         }
+
+        if (picture.getSize() <= 0) {
+            throw new InvalidPictureException("Invalid picture size: " + picture.getSize());
+        }
+
+        InputStream stream;
+        try {
+            stream = picture.getInputStream();
+        } catch (IOException e) {
+            throw new InvalidPictureException("Invalid picture stream: " + e.getMessage());
+        }
+
+        Path root = storageProperties.studentPictures();
+        try {
+            Files.createDirectories(root);
+        } catch (IOException ex) {
+            throw new PictureStorageException(ex.getMessage());
+        }
+
+        String extension = getExtension(picture.getOriginalFilename());
+        String filename = UUID.randomUUID() + extension;
+
+        Path target = root.resolve(filename);
+        try {
+            Files.copy(stream, target, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException ex) {
+            throw new PictureStorageException(ex.getMessage());
+        }
+
+        var student = new Student(request.name(), target.toString(), request.birthDate());
+        var saved = studentRepository.save(student);
+        return new RegisterStudentResponse(
+                saved.getId(), saved.getName(), saved.getPicture(), saved.getBirthDate());
     }
 
     private String getExtension(String filename) {

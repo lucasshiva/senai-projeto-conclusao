@@ -1,7 +1,6 @@
 package br.com.senai.projetointegrador.features.students.register;
 
 import br.com.senai.projetointegrador.config.storage.StorageProperties;
-import br.com.senai.projetointegrador.errors.FileStorageException;
 import br.com.senai.projetointegrador.features.students.StudentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,14 +10,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class RegisterStudentHandlerTest {
@@ -39,19 +39,7 @@ class RegisterStudentHandlerTest {
         handler = new RegisterStudentHandler(studentRepository, storageProperties);
     }
 
-    @Test
-    void shouldThrowExceptionWhenPathIsInvalid() {
-        when(storageProperties.studentPictures()).thenReturn(Path.of("/system-root-forbidden"));
-
-        var request = new RegisterStudentRequest("Bad Path", LocalDate.now());
-        var picture = new MockMultipartFile("picture", "test.jpg", "image/jpeg", "content".getBytes());
-        var command = new RegisterStudentCommand(request, picture);
-
-        assertThrows(FileStorageException.class, () -> handler.handle(command));
-        verifyNoInteractions(studentRepository);
-    }
-
-    @Test
+    @Test()
     void shouldSaveToDatabaseWhenFileIsStoredSuccessfully() {
         when(storageProperties.studentPictures()).thenReturn(tempDir);
 

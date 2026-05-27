@@ -1,12 +1,11 @@
 package br.com.senai.projetointegrador.errors;
 
 import br.com.senai.projetointegrador.features.auth.register.InvalidLoginException;
+import br.com.senai.projetointegrador.features.students.register.exceptions.InvalidPictureException;
 import br.com.senai.projetointegrador.features.users.UserNotFoundException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
 import org.springframework.http.*;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -45,7 +44,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+    protected ResponseEntity<@NonNull Object> handleMethodArgumentNotValid(
             @NonNull MethodArgumentNotValidException ex,
             @NonNull HttpHeaders headers,
             @NonNull HttpStatusCode status,
@@ -54,7 +53,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         var pd = ProblemDetail.forStatusAndDetail(status, "One or more fields failed validation.");
         pd.setTitle("Validation Failed");
 
-        List<FieldErrorDetail> errors = ex.getBindingResult()
+        List<FieldErrorDetail> errors = ex
+                .getBindingResult()
                 .getFieldErrors()
                 .stream()
                 .map(error -> new FieldErrorDetail(error.getField(), error.getDefaultMessage()))
@@ -62,5 +62,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         pd.setProperty("errors", errors);
 
         return handleExceptionInternal(ex, pd, headers, status, request);
+    }
+
+    @ExceptionHandler(InvalidPictureException.class)
+    public ProblemDetail handleInvalidPictureException(InvalidPictureException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 }

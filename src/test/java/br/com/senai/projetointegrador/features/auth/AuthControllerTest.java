@@ -39,29 +39,29 @@ class AuthControllerTest extends IntegrationTestBase {
         private final RegisterRequest validRequest =
                 new RegisterRequest("lucas", validLogin, validPassword, Role.TEACHER);
 
-        private void registerWithSuccessSuccess(RegisterRequest request) {
+        private void registerWithStatus200(RegisterRequest request) {
             client.post()
-                    .uri("/auth/register")
-                    .body(request)
-                    .exchange()
-                    .expectStatus()
-                    .isOk();
+                  .uri("/auth/register")
+                  .body(request)
+                  .exchange()
+                  .expectStatus()
+                  .isOk();
         }
 
         private void registerWithValidationFailure(RegisterRequest request) {
             client.post()
-                    .uri("/auth/register")
-                    .body(request)
-                    .exchange()
-                    .expectStatus()
-                    .isBadRequest();
+                  .uri("/auth/register")
+                  .body(request)
+                  .exchange()
+                  .expectStatus()
+                  .isBadRequest();
         }
 
         @Nested
         class Validation {
             @Test
             void should_register_with_valid_payload() {
-                registerWithSuccessSuccess(validRequest);
+                registerWithStatus200(validRequest);
             }
 
             @ParameterizedTest
@@ -97,7 +97,7 @@ class AuthControllerTest extends IntegrationTestBase {
 
             @Test
             void should_encode_password_on_register() {
-                registerWithSuccessSuccess(validRequest);
+                registerWithStatus200(validRequest);
                 var optUser = userRepository.findByLogin(validRequest.login());
                 assertThat(optUser).isPresent();
 
@@ -109,30 +109,30 @@ class AuthControllerTest extends IntegrationTestBase {
             @Test
             void should_return_token_on_register() {
                 client.post()
-                        .uri("/auth/register")
-                        .body(validRequest)
-                        .exchange()
-                        .expectStatus()
-                        .isOk()
-                        .expectBody(RegisterResponse.class)
-                        .value(body -> {
-                            assertThat(body).isNotNull();
-                            assertThat(body.token()).isNotNull();
-                            assertThat(body.token()).isNotBlank();
-                        });
+                      .uri("/auth/register")
+                      .body(validRequest)
+                      .exchange()
+                      .expectStatus()
+                      .isOk()
+                      .expectBody(RegisterResponse.class)
+                      .value(body -> {
+                          assertThat(body).isNotNull();
+                          assertThat(body.token()).isNotNull();
+                          assertThat(body.token()).isNotBlank();
+                      });
             }
 
             @Test
             void should_reject_duplicate_login() {
-                var user = addUserToDb("user", "password");
+                var user = addUserToDb("name", "user", "password", Role.TEACHER);
                 var request = new RegisterRequest("name", user.getLogin(), user.getPassword(), Role.TEACHER);
                 client.post()
-                        .uri("/auth/register")
-                        .body(request)
-                        .exchange()
-                        .expectStatus()
-                        .isEqualTo(HttpStatus.CONFLICT)
-                        .expectBody(ProblemDetail.class);
+                      .uri("/auth/register")
+                      .body(request)
+                      .exchange()
+                      .expectStatus()
+                      .isEqualTo(HttpStatus.CONFLICT)
+                      .expectBody(ProblemDetail.class);
             }
         }
     }
@@ -145,13 +145,13 @@ class AuthControllerTest extends IntegrationTestBase {
         class Validation {
             @Test
             void should_login_with_valid_payload() {
-                addUserToDb(validRequest.username(), validRequest.password());
+                addUserToDb("name", validRequest.username(), validRequest.password(), Role.TEACHER);
                 client.post()
-                        .uri("/auth/login")
-                        .body(validRequest)
-                        .exchange()
-                        .expectStatus()
-                        .isOk();
+                      .uri("/auth/login")
+                      .body(validRequest)
+                      .exchange()
+                      .expectStatus()
+                      .isOk();
             }
 
             @ParameterizedTest
@@ -159,11 +159,11 @@ class AuthControllerTest extends IntegrationTestBase {
             void should_reject_blank_or_missing_username(String username) {
                 var request = validRequest.withUsername(username);
                 client.post()
-                        .uri("/auth/login")
-                        .body(request)
-                        .exchange()
-                        .expectStatus()
-                        .isBadRequest();
+                      .uri("/auth/login")
+                      .body(request)
+                      .exchange()
+                      .expectStatus()
+                      .isBadRequest();
             }
 
             @ParameterizedTest
@@ -171,11 +171,11 @@ class AuthControllerTest extends IntegrationTestBase {
             void should_reject_blank_or_missing_password(String password) {
                 var request = validRequest.withPassword(password);
                 client.post()
-                        .uri("/auth/login")
-                        .body(request)
-                        .exchange()
-                        .expectStatus()
-                        .isBadRequest();
+                      .uri("/auth/login")
+                      .body(request)
+                      .exchange()
+                      .expectStatus()
+                      .isBadRequest();
             }
         }
 
@@ -183,19 +183,19 @@ class AuthControllerTest extends IntegrationTestBase {
         class BusinessLogic {
             @Test
             void should_return_token_on_login() {
-                addUserToDb(validRequest.username(), validRequest.password());
+                addUserToDb("name", validRequest.username(), validRequest.password(), Role.TEACHER);
                 client.post()
-                        .uri("/auth/login")
-                        .body(validRequest)
-                        .exchange()
-                        .expectStatus()
-                        .isOk()
-                        .expectBody(LoginResponse.class)
-                        .value(body -> {
-                            assertThat(body).isNotNull();
-                            assertThat(body.token()).isNotNull();
-                            assertThat(body.token()).isNotBlank();
-                        });
+                      .uri("/auth/login")
+                      .body(validRequest)
+                      .exchange()
+                      .expectStatus()
+                      .isOk()
+                      .expectBody(LoginResponse.class)
+                      .value(body -> {
+                          assertThat(body).isNotNull();
+                          assertThat(body.token()).isNotNull();
+                          assertThat(body.token()).isNotBlank();
+                      });
             }
         }
     }

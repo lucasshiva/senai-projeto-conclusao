@@ -21,31 +21,37 @@ class UserControllerTest extends IntegrationTestBase {
             @Test
             void should_reject_request_with_no_id() {
                 var request = new GetUserByIdRequest(null);
+                var admin = userRepository.save(ADMIN);
+                var token = getTokenFor(admin);
                 client.get()
-                        .uri("/users/{id}", request.id())
-                        .headers(headers -> headers.setBearerAuth(adminToken))
-                        .exchange()
-                        .expectStatus()
-                        .isNotFound()
-                        .expectBody(ProblemDetail.class);
+                      .uri("/users/{id}", request.id())
+                      .headers(headers -> headers.setBearerAuth(token))
+                      .exchange()
+                      .expectStatus()
+                      .isNotFound()
+                      .expectBody(ProblemDetail.class);
             }
 
             @Test
             void should_return_user_with_valid_payload() {
-                var user = addUserToDb("validLogin", "validPassword");
-                var request = new GetUserByIdRequest(user.getId());
+                var teacher = userRepository.save(TEACHER);
+                var admin = userRepository.save(ADMIN);
+
+                var request = new GetUserByIdRequest(teacher.getId());
+                var token = getTokenFor(admin);
+
                 client.get()
-                        .uri("/users/{id}", request.id())
-                        .headers(headers -> headers.setBearerAuth(adminToken))
-                        .exchange()
-                        .expectStatus()
-                        .isOk()
-                        .expectBody(UserDto.class)
-                        .value(body -> {
-                            assertThat(body).isNotNull();
-                            assertThat(body.login()).isEqualTo(user.getLogin());
-                            assertThat(body.role()).isEqualTo(user.getRole());
-                        });
+                      .uri("/users/{id}", request.id())
+                      .headers(headers -> headers.setBearerAuth(token))
+                      .exchange()
+                      .expectStatus()
+                      .isOk()
+                      .expectBody(UserDto.class)
+                      .value(body -> {
+                          assertThat(body).isNotNull();
+                          assertThat(body.login()).isEqualTo(teacher.getLogin());
+                          assertThat(body.role()).isEqualTo(teacher.getRole());
+                      });
             }
         }
 
@@ -53,53 +59,57 @@ class UserControllerTest extends IntegrationTestBase {
         class BussinessLogic {
             @Test
             void should_reject_unauthenticated_requests() {
-                var user = addUserToDb("normalLogin", "normalPass");
-                var request = new GetUserByIdRequest(user.getId());
+                var teacher = userRepository.save(TEACHER);
+                var request = new GetUserByIdRequest(teacher.getId());
                 client.get()
-                        .uri("/users/{id}", request.id())
-                        .exchange()
-                        .expectStatus()
-                        .isEqualTo(HttpStatus.UNAUTHORIZED)
-                        .expectBody(ProblemDetail.class);
+                      .uri("/users/{id}", request.id())
+                      .exchange()
+                      .expectStatus()
+                      .isEqualTo(HttpStatus.UNAUTHORIZED)
+                      .expectBody(ProblemDetail.class);
             }
 
             @Test
             void should_allow_admin_requests() {
-                var user = addUserToDb("adminLogin", "adminPass");
-                var request = new GetUserByIdRequest(user.getId());
+                var teacher = userRepository.save(TEACHER);
+                var admin = userRepository.save(ADMIN);
+
+                var request = new GetUserByIdRequest(teacher.getId());
+                var token = getTokenFor(admin);
+
                 client.get()
-                        .uri("/users/{id}", request.id())
-                        .headers(headers -> headers.setBearerAuth(adminToken))
-                        .exchange()
-                        .expectStatus()
-                        .isOk()
-                        .expectBody(UserDto.class)
-                        .value(body -> {
-                            assertThat(body).isNotNull();
-                            assertThat(body.login()).isEqualTo(user.getLogin());
-                            assertThat(body.role()).isEqualTo(user.getRole());
-                        });
+                      .uri("/users/{id}", request.id())
+                      .headers(headers -> headers.setBearerAuth(token))
+                      .exchange()
+                      .expectStatus()
+                      .isOk()
+                      .expectBody(UserDto.class)
+                      .value(body -> {
+                          assertThat(body).isNotNull();
+                          assertThat(body.login()).isEqualTo(teacher.getLogin());
+                          assertThat(body.role()).isEqualTo(teacher.getRole());
+                      });
             }
 
             @ParameterizedTest
             @EnumSource(value = Role.class, names = "ADMINISTRATIVE_TEACHER", mode = EnumSource.Mode.EXCLUDE)
             void should_reject_non_admin_requests(Role role) {
-                var rawPassword = "rawPassword";
-                var user = addUserToDb("login", rawPassword, role);
-                var request = new GetUserByIdRequest(user.getId());
-                var token = getTokenFor(user);
+                var NON_ADMIN_USER = addUserToDb("name", "login", "rawPassword", role);
+                var NON_ADMIN_TOKEN = getTokenFor(NON_ADMIN_USER);
+                var request = new GetUserByIdRequest(NON_ADMIN_USER.getId());
+
                 client.get()
-                        .uri("/users/{id}", request.id())
-                        .headers(headers -> headers.setBearerAuth(token))
-                        .exchange()
-                        .expectStatus()
-                        .isUnauthorized()
-                        .expectBody(ProblemDetail.class)
-                        .value(body -> {
-                            assertThat(body).isNotNull();
-                            assertThat(body.getDetail())
-                                    .isEqualTo("Full authentication is required to access this resource");
-                        });
+                      .uri("/users/{id}", request.id())
+                      .headers(headers -> headers.setBearerAuth(NON_ADMIN_TOKEN))
+                      .exchange()
+                      .expectStatus()
+                      .isUnauthorized()
+                      .expectBody(ProblemDetail.class)
+                      .value(body -> {
+                          assertThat(body).isNotNull();
+                          assertThat(body.getDetail())
+                                  .isEqualTo("Full authentication is required to access this resource");
+                      });
             }
         }
     }
