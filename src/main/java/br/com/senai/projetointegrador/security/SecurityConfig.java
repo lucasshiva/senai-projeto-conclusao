@@ -30,6 +30,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/users", "/users/**").hasRole("ADMINISTRATIVE_TEACHER")
+                        .requestMatchers(HttpMethod.POST, "/courses").hasRole("ADMINISTRATIVE_TEACHER")
                         .requestMatchers(HttpMethod.POST, "/students").hasRole("ADMINISTRATIVE_TEACHER")
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()
