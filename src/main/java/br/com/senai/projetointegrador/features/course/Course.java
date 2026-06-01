@@ -1,8 +1,13 @@
 package br.com.senai.projetointegrador.features.course;
 
+import br.com.senai.projetointegrador.features.course.enrollStudent.EnrollException;
+import br.com.senai.projetointegrador.features.students.Student;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "courses")
@@ -23,11 +28,26 @@ public class Course {
     @Enumerated(EnumType.STRING)
     private Semester semester;
 
+    @ManyToMany
+    @JoinTable(
+            name = "course_students",
+            joinColumns = @JoinColumn(name = "course_id"),
+            inverseJoinColumns = @JoinColumn(name = "student_id")
+    )
+    private final Set<Student> students = new HashSet<>();
+
     public Course(String name, Shift shift, int year, Semester semester) {
         this.id = null;
         this.name = name;
         this.shift = shift;
         this.year = year;
         this.semester = semester;
+    }
+
+    public void enrollStudent(Student student) {
+        if (this.students.contains(student)) {
+            throw new EnrollException(student.getId(), this.getId());
+        }
+        this.students.add(student);
     }
 }
