@@ -6,6 +6,7 @@ import br.com.senai.projetointegrador.security.JwtTokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -14,6 +15,7 @@ public class RegisterHandler {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenService jwtTokenService;
 
+    @Transactional
     public RegisterResponse handle(RegisterRequest request) {
         if (userRepository.existsByLogin(request.login())) {
             throw new InvalidLoginException();

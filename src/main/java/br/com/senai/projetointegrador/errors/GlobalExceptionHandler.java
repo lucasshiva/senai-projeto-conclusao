@@ -1,6 +1,9 @@
 package br.com.senai.projetointegrador.errors;
 
 import br.com.senai.projetointegrador.features.auth.register.InvalidLoginException;
+import br.com.senai.projetointegrador.features.course.exceptions.CourseNotFoundException;
+import br.com.senai.projetointegrador.features.incidents.exceptions.IncidentNotFoundException;
+import br.com.senai.projetointegrador.features.students.errors.StudentNotFoundException;
 import br.com.senai.projetointegrador.features.students.register.exceptions.InvalidPictureException;
 import br.com.senai.projetointegrador.features.users.UserNotFoundException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
@@ -33,7 +36,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return problemDetail;
     }
 
-    @ExceptionHandler(UserNotFoundException.class)
+    @ExceptionHandler({
+            UserNotFoundException.class,
+            CourseNotFoundException.class,
+            StudentNotFoundException.class,
+            IncidentNotFoundException.class
+    })
     public ProblemDetail handleUserNotFoundException(UserNotFoundException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
     }
