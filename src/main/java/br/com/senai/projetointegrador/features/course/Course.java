@@ -28,7 +28,7 @@ public class Course {
     @Enumerated(EnumType.STRING)
     private Semester semester;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "course_students",
             joinColumns = @JoinColumn(name = "course_id"),

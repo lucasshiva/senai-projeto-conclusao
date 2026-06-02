@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 class CourseControllerTest extends IntegrationTestBase {
     @Autowired
     private CourseRepository courseRepository;
@@ -50,12 +52,14 @@ class CourseControllerTest extends IntegrationTestBase {
             var admin = userRepository.save(ADMIN);
             var adminToken = getTokenFor(admin);
 
-            studentRepository.save(validStudent);
-            courseRepository.save(validCourse);
+            var student = studentRepository.save(validStudent);
+            var course = courseRepository.save(validCourse);
 
-            var request = new EnrollStudentRequest(validStudent.getId());
+            assertThat(course.getStudents()).hasSize(0);
+
+            var request = new EnrollStudentRequest(student.getId());
             client.post()
-                  .uri("/courses/{id}/students", validCourse.getId())
+                  .uri("/courses/{id}/students", course.getId())
                   .body(request)
                   .headers(h -> h.setBearerAuth(adminToken))
                   .exchange()
@@ -63,6 +67,10 @@ class CourseControllerTest extends IntegrationTestBase {
                   .isOk()
                   .expectBody(EnrollStudentResponse.class);
 
+            var optCourse = courseRepository.findById(course.getId());
+            assertThat(optCourse).isPresent();
+            var courseInDb = optCourse.get();
+            assertThat(courseInDb.getStudents()).hasSize(1);
         }
     }
 }

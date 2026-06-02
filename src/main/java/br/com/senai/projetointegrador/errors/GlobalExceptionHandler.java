@@ -42,7 +42,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             StudentNotFoundException.class,
             IncidentNotFoundException.class
     })
-    public ProblemDetail handleUserNotFoundException(UserNotFoundException ex) {
+    public ProblemDetail handleUserNotFoundException(RuntimeException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 

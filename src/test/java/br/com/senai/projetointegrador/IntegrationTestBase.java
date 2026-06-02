@@ -54,6 +54,9 @@ public abstract class IntegrationTestBase {
         jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 0");
         jdbcTemplate.execute("TRUNCATE TABLE users");
         jdbcTemplate.execute("TRUNCATE TABLE students");
+        jdbcTemplate.execute("TRUNCATE TABLE courses");
+        jdbcTemplate.execute("TRUNCATE TABLE course_students");
+        jdbcTemplate.execute("TRUNCATE TABLE incidents");
         jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 1");
 
         TEACHER = new User("John", "teacher", "teacher", Role.TEACHER);

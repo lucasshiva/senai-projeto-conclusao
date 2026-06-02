@@ -38,7 +38,7 @@ public class RegisterIncidentHandler {
                 .orElseThrow(UserNotFoundException::new);
 
         var incident = new Incident(course, student, user, request.type(), request.description());
-        incidentRepository.save(incident);
-        return incidentMapper.toDto(incident);
+        var saved = incidentRepository.save(incident);
+        return incidentMapper.toDto(saved);
     }
 }

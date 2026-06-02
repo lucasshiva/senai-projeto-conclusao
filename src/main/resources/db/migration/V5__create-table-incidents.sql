@@ -13,7 +13,7 @@ CREATE TABLE incidents (
 
     CONSTRAINT fk_incidents_student 
         FOREIGN KEY (student_id)
-        REFERENCES students(id)
+        REFERENCES students(id),
 
     CONSTRAINT fk_incidents_user
             FOREIGN KEY (user_id)
